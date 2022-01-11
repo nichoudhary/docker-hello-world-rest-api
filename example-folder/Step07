@@ -1,0 +1,59 @@
+-------------------------------------------------------------------------------------------
+Number 20 - Step07 Improving Caching of Docker images by Adding Libraries in a Separate S
+-------------------------------------------------------------------------------------------
+Let's explore other ways to create images. We'll also see how to create image efficiently. In this step, let's focus on
+making our image layers even more cacheable.
+
+Current situation:
+First JDK and above it FAT JAR ---
+we have the image for the JDK which is downloaded and on top of it, we are copying the fat jar. This fat jar is created by
+the Spring Boot Maven Plugin. This fat jar contains two different things. One is the Maven Dependencies i.e what are all the
+jars that are needed to run the application and the next thing which would be present in here are the class files and the
+property files that are needed to run the application.
+
+Desired situation:
+First JDK and above it DEPENDENCIES and above it CLASSES ---
+This is because we want the first two layers to be cached as over the period of time, we won't be making any much changes in
+the first two layers. Mostly changes will be made it the classes.
+
+Before getting into the desired situation one of the first thing, we'll need to do is to split the FAT jar into it's
+individual components. How do we do that? There's a maven dependency plugin and the goal for this plugin is UNPACK. This
+plugin with this goal would split the jar into it's individual components.
+
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-dependency-plugin</artifactId>
+	<executions>
+		<execution>
+			<id>unpack</id>
+			<phase>package</phase>
+			<goals>
+				<goal>unpack</goal>
+			</goals>
+			<configuration>
+				<artifactItems>
+					<artifactItem>
+						<groupId>${project.groupId}</groupId>
+						<artifactId>${project.artifactId}</artifactId>
+						<version>${project.version}</version>
+					</artifactItem>
+				</artifactItems>
+			</configuration>
+		</execution>
+	</executions>
+</plugin>
+
+Since this plugin is tied to the package phase -> do -> mvn clean package -> the unpacking will be done.
+Now what do we want in the Dockerfile right now is we'd want to separate the copying of dependencies and the classes so
+that the dependencies layer would be cached most of the times. So what we'd want to do is ---
+first -> copy the lib folder from BOOT-INF [target/dependency/BOOT-INF/lib] first into the Docker image
+second -> copy the classes folder into the Docker image
+And then we'd copy META-INF files into the image.
+
+readme -> level 2 contains all the docker instructions. put these commands in Dockerfile
+Then run -> #$ docker build -t nichoudhary/hello-world-rest-api:dockerfile2 .
+Then make a slight hello world version change V5
+then run mvn clean package command
+Then build the image again to see the caching process -> #$ docker build -t nichoudhary/hello-world-rest-api:dockerfile2 .
+
+
