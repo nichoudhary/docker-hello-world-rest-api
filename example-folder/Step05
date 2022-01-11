@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------
+Number 19 - Step05 Using Dockerfile Spotify plugin to create Docker images
+--------------------------------------------------------------------------
+
+Earlier we were using 2-3 steps to build our image. How can we build an entire image with just one command. That's where the Maven plugin comes into picture. One of the popular Maven plugins for building Docker images is Spotify Docker file Maven plugin.
+
+-> github.com/spotify/dockerfile-maven
+
+Add this plugin in the pom.xml
+
+<plugin>
+	<groupId>com.spotify</groupId>
+	<artifactId>dockerfile-maven-plugin</artifactId>
+	<version>1.4.10</version>
+	<executions>
+		<execution>
+			<id>default</id>
+			<goals>
+				<goal>build</goal>
+			</goals>
+		</execution>
+	</executions>
+	<configuration>
+		<repository>in28min/${project.name}</repository>
+		<tag>${project.version}</tag>
+		<skipDockerInfo>true</skipDockerInfo>
+	</configuration>
+</plugin>
+
+What we're configuring here is we'd want to execute a goal of build by default. What we are saying is, tie up with the with the maven build lifecycle and always build the image. What it would do by default is, to tie up with the package phase of the maven build and it executes the build which creates a Docker image.
+Other thing which we are configuring is repository name -> nichoudhary/&{project.name} and the tag -> ${project.version}

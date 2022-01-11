@@ -1,0 +1,21 @@
+--------------------------------------------------------------------------
+Number 16 - Step03 Use Docker File to Build Docker Image
+--------------------------------------------------------------------------
+
+Here, we'll automate the manual process that we had for building an image in the previous step.
+Firstly, we'll create a Dockerfile. In this Dockerfile, we can specify the instructions for creating the image.
+What instructions, you'd want to execute?
+1. Specify the base image from which image your container should be created.
+-> FROM openjdk:8-jdk-alpine
+2. Once we have the base image we'd want to copy the jar (target/hello-world-rest-api.jar) into the image (hello-world-rest-api) with the same name.
+-> ADD target/hello-world-rest-api.jar hello-world-rest-api
+3. Next thing is we'd want to set the command which needs to be run at startup. Earlier, we use this cmd to set that up. In the Dockerfile, the way we can set that up is by saying something called ENTRYPOINT. So, it's an instruction and what we are doing is, set the command which needs to be executed at startup. So, in the shell we'd want to execute a command -> java -jar and in the root /hello-world-rest-api.jar
+-> ENTRYPOINT ["sh", "-c", "java -jar /hello-world-rest-api.jar"]
+
+Now, how can we use this to create an image?
+In the terminal, we can say -> #$ docker build -t nichoudhary/hello-world-rest-api:dockerfile2 .
+-t stand for a tag, as we need to give a tag (for eg dockerfile2) to the specific image and at the end we need to give a dot "." which is very important.
+
+Now execute docker run command -> #$ docker run -p 8080:8080 nichoudhary/hello-world-rest-api:dockerfile2
+
+You can see that the application is up and running. yayayy!!!!

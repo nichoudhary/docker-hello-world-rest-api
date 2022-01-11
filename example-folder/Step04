@@ -1,0 +1,18 @@
+--------------------------------------------------------------------------
+Number 17 - Step04 Understanding Docker Image Layers, Caching and Dockerfile
+--------------------------------------------------------------------------
+
+#$ docker history nichoudhary/hello-world-rest-api:dockerfile2
+
+One of the interesting thing is docker layers are cached. We didn't make any changes in the jar and If we'll use the same docker build (docker build -t nichoudhary/hello-world-rest-api:dockerfile2 .) command as above to build another image, we'll see that it's using everything from the cache. It's not really creating a new image. It says using cache. So, it's using the already created image from the prev command. So, unless there are modifications, layers would be cached as much as possible.
+
+Let's add another instruction in the Docker file
+-> EXPOSE 8080
+It means if you create an image from me, the container would run on port 8080. The important thing to understand is, it will not publish the port. So, this 8080 will not be available on the host. For that, you should use the --publish or the -p option. EXPOSE 8080 is just an information for the outside world. It's informing that this container would run on the internal network on port 8080. This "EXPOSE 8080" is just an information meta-data.
+
+After adding the above command in Dockerfile, let's run the image again. First build -> docker build -t nichoudhary/hello-world-rest-api:dockerfile2 .
+After running this command, we can see that, for the first step the image is re-used but for the next of the steps we are not really using the cache.
+
+Now, let's just make a small modification in the hello world container and then re-build the jar -> mvn package
+And now again run docker build -> docker build -t nichoudhary/hello-world-rest-api:dockerfile2 .
+And try to see what steps are using cache and what all not.

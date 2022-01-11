@@ -1,0 +1,45 @@
+--------------------------------------------------------------------------
+Number 14 - Step02 Build Docker Image Manually for 01 hello world rest api
+--------------------------------------------------------------------------
+
+In this step, we'll take a manual approach to build a docker image for hello world rest API.
+
+Building an Image manually->
+
+1. Build a Jar -> name of the built jar -> /target/hello-world-rest-api.jar.  -> mvn clean package
+2. Setup the Prerequisites for Running the JAR -> we are going to use open JDK image (alpine) --> openjdk:8-jdk-alpine
+3. Copy the jar in the above specific image
+4. Run the jar as part of the container.
+
+Firstly build your jar -> mvn clean package
+Then go to terminal and cd inside the folder where hello-world-rest-api is and then execute -> docker run -dit openjdk:8-jdk-alpine
+-dit because "-d" in -dit means detached mode and "-it" means it will allow us to run a few commands against the running container. So, "-it" is what is called as an interactive shell i.e. we are attaching an interactive shell to the running container.
+
+for eg: we want execute a command for a running container like we want to see what is inside the /tmp folder in a particular runnning container ->
+#$ docker container {container_assinged_name} ls /tmp
+
+We can see that an image is created with a container id returned check using the below commands:
+#$ docker images
+#$ docker container ls
+
+Now after completing step1 and step2, we can can copy our jar file in the running docker container using command ->
+#$ docker container cp {jar_file_address} {docker-container-name or container-id}:/tmp -> for eg -> docker container cp target/hello-world-rest-api.jar bold_shaw:/tmp
+
+Now after the above step we can see that in /tmp folder we have the hello-world-rest-api present.
+#$ docker container exec bold_shaw ls /tmp
+
+Now as the jar is being copied in the specific image, we'd want to be able to run the JAR. We need to do two simple steps.
+step1- save the container which we have created as an image using command -> #$ docker conatiner commit {container_name} {you_want_to_name_your_image_as:tag} -> for eg
+#$ docker container commit bold_shaw nichoudhary/hello-world-rest-api:manual1
+So, here we are assinging the repository name as nichoudhary/hello-world-rest-api and the tag we are giving is manual1. Now the above command will create an image and will return us an image id. we can also see it by running docker images command
+
+Now, after execution of all the above steps -> try #$ docker run nichoudhary/hello-world-rest-api:manual1, and check docker container ls command, we will see that it is not running because we did not attach anything to run at startup. When we run the above specific image we need to say that, okay this is the JAR file which needs to be launched at startup. We copied the JAR file into this specific image, but we didn't specify that the JAR file has to be launched at startup. How do we do that? Using the below command ->
+#$ docker container commit --change='CMD ["java","-jar","location_of_the_jar_in_docker"]' {container_name} {name_of_the_image_with_different_tag} -> for eg ->
+-> docker container commit --change='CMD ["java","-jar","/tmp/hello-world-rest-api.jar"]' bold_shaw nichoudhary/hello-world-rest-api:manual2
+here --change is the way to add a startup command
+
+check docker images, you'll find a new image with tag manual2, the again run the docker run command using the new manual2 tag and also write the port you'd want to expose
+-> docker run -p 8080:8080 nichoudhary/hello-world-rest-api:manual2
+
+We can see that our application has started!!!! Yayyyyy!!
+But we could that this manual process was very tedious. And also, what if make any changes in the application, we'll have to again repeat the above steps.
