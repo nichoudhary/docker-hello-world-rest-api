@@ -1,0 +1,45 @@
+--------------------------------------------------------------------------
+Number 20 - Step08 Using JIB Plugin to create docker image
+--------------------------------------------------------------------------
+
+The matter of fact is, the Dockerfile Maven Plugin in not the only plugin out there which can help you with building images for
+your application. One of the popular options is something called JIB.
+
+About JIB - mentioned in the readMe -> https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart
+
+JIB is a maven plugin for building Docker and OCI images for your java app. With JIB you don't need Dockerfile at all.
+
+<plugin>
+	<groupId>com.google.cloud.tools</groupId>
+	<artifactId>jib-maven-plugin</artifactId>
+	<version>1.6.1</version>
+	<configuration>
+		<container>
+			<creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+		</container>
+	</configuration>
+	<executions>
+		<execution>
+			<phase>package</phase>
+			<goals>
+				<goal>dockerBuild</goal>
+			</goals>
+		</execution>
+	</executions>
+</plugin>
+
+Now put the above plugin in pom.xml and delete the Dockerfile. Also comment out the maven dependency plugin.
+run -> mvn clean package
+And we can see that our image is created in the logs.
+LOGS
+--------
+Built image to Docker daemon as 01-hello-world-rest-api:0.0.1-SNAPSHOT
+[INFO] Executing tasks:
+[INFO] [==============================] 100.0% complete
+-----------
+
+run -> docker history 01-hello-world-rest-api:0.0.1-SNAPSHOT
+run -> docker run -p 8080:8080 01-hello-world-rest-api:0.0.1-SNAPSHOT
+
+Remember that Java specific and only java applications can be built from it. Also we can configure the base image and  a
+lot of other things for that refer to readme -> after jib plugin part.
