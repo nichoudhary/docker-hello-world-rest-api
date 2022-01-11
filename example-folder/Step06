@@ -1,0 +1,9 @@
+--------------------------------------------------------------------------
+Number 20 - Step06 Creating a Generic reusable Dockerfile
+--------------------------------------------------------------------------
+
+For making it common accross multiple projects, what we can do is in Dockerfile, instead of specifying a specific jar name
+to copy, we can say -> ADD target/*.jar {any_common_name}.jar -> ADD target/*.jar app.jar
+-> ENTRYPOINT ["sh", "-c", "java -jar /app.jar"]
+
+Now let's build the docker image using mvn clean package and use docker run command to launch the application.
